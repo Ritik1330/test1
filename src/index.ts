@@ -1,58 +1,70 @@
-import express from "express";
+import express, { Request, Response } from "express";
+
+const app = express();
+const port = process.env.PORT || 8080;
+
+app.get("/", (_req: Request, res: Response) => {
+  return res.send("Express Typescript on Vercel");
+});
+
+app.get("/ping", (_req: Request, res: Response) => {
+  return res.send("pong 🏓");
+});
+
+app.get("/json", (_req: Request, res: Response) => {
+  return res.status(200).json({
+    success: true,
+    message: "Category Deleted Succesfully",
+  });
+});
+
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import streamifier from "streamifier";
 
-// Initialize environment variables
 dotenv.config();
-
-// Set up memory storage for multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-// Configure Cloudinary
+const uploadMiddleware = upload.single("file");
 cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
+  cloud_name: "dbacwthnv",
+  api_key: "511772263679235",
+  api_secret: "0opOgfJbWCdJmdzQHjka-eMjVXc",
   secure: true,
 });
 
-// Create Express app
-const app = express();
-
-// Define a route for file upload
-app.post("/upload", upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
-
-  try {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "demo",
-      },
-      (error, result) => {
-        if (error) {
-          return res.status(500).json({ message: "Upload failed", error });
-        }
-        res.status(200).json(result);
+function runMiddleware(req: any, res: any, fn: any) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
       }
-    );
+      return resolve(result);
+    });
+  });
+}
 
-    // Convert file buffer to readable stream and pipe to Cloudinary
-    streamifier.createReadStream(req.file.buffer).pipe(stream);
-  } catch (error) {
-    res.status(500).json({ message: "An error occurred", error });
-  }
+app.post("/img", async (req: any, res: Response) => {
+  await runMiddleware(req, res, uploadMiddleware);
+  console.log(req.file.buffer);
+  const stream = await cloudinary.uploader.upload_stream(
+    {
+      folder: "demo",
+    },
+    (error, result) => {
+      if (error) return console.error(error);
+      res.status(200).json(result);
+    }
+  );
+  streamifier.createReadStream(req.file.buffer).pipe(stream);
 });
+// export const config = {
+//   api: {
+//     bodyParser: true,
+//   },
+// };
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(port, () => {
+  return console.log(`Server is listening on ${port}`);
 });
-
-
-//ritik

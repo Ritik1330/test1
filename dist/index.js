@@ -4,48 +4,61 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const app = (0, express_1.default)();
+const port = process.env.PORT || 8080;
+app.get("/", (_req, res) => {
+    return res.send("Express Typescript on Vercel");
+});
+app.get("/ping", (_req, res) => {
+    return res.send("pong 🏓");
+});
+app.get("/json", (_req, res) => {
+    return res.status(200).json({
+        success: true,
+        message: "Category Deleted Succesfully",
+    });
+});
 const multer_1 = __importDefault(require("multer"));
 const cloudinary_1 = require("cloudinary");
 const dotenv_1 = __importDefault(require("dotenv"));
 const streamifier_1 = __importDefault(require("streamifier"));
-// Initialize environment variables
 dotenv_1.default.config();
-// Set up memory storage for multer
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
-// Configure Cloudinary
+const uploadMiddleware = upload.single("file");
 cloudinary_1.v2.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
+    cloud_name: "dbacwthnv",
+    api_key: "511772263679235",
+    api_secret: "0opOgfJbWCdJmdzQHjka-eMjVXc",
     secure: true,
 });
-// Create Express app
-const app = (0, express_1.default)();
-// Define a route for file upload
-app.post("/upload", upload.single("file"), async (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-    }
-    try {
-        const stream = cloudinary_1.v2.uploader.upload_stream({
-            folder: "demo",
-        }, (error, result) => {
-            if (error) {
-                return res.status(500).json({ message: "Upload failed", error });
+function runMiddleware(req, res, fn) {
+    return new Promise((resolve, reject) => {
+        fn(req, res, (result) => {
+            if (result instanceof Error) {
+                return reject(result);
             }
-            res.status(200).json(result);
+            return resolve(result);
         });
-        // Convert file buffer to readable stream and pipe to Cloudinary
-        streamifier_1.default.createReadStream(req.file.buffer).pipe(stream);
-    }
-    catch (error) {
-        res.status(500).json({ message: "An error occurred", error });
-    }
+    });
+}
+app.post("/img", async (req, res) => {
+    await runMiddleware(req, res, uploadMiddleware);
+    console.log(req.file.buffer);
+    const stream = await cloudinary_1.v2.uploader.upload_stream({
+        folder: "demo",
+    }, (error, result) => {
+        if (error)
+            return console.error(error);
+        res.status(200).json(result);
+    });
+    streamifier_1.default.createReadStream(req.file.buffer).pipe(stream);
 });
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// export const config = {
+//   api: {
+//     bodyParser: true,
+//   },
+// };
+app.listen(port, () => {
+    return console.log(`Server is listening on ${port}`);
 });
-//ritik
