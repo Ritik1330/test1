@@ -57,11 +57,11 @@ app.get("/img", async (req: any, res: Response) => {
   );
   streamifier.createReadStream(req.file.buffer).pipe(stream);
 });
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: true,
+//   },
+// };
 
 app.listen(port, () => {
   return console.log(`Server is listening on ${port}`);

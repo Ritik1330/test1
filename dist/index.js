@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.config = void 0;
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
 const port = process.env.PORT || 8080;
@@ -55,11 +54,11 @@ app.get("/img", async (req, res) => {
     });
     streamifier_1.default.createReadStream(req.file.buffer).pipe(stream);
 });
-exports.config = {
-    api: {
-        bodyParser: true,
-    },
-};
+// export const config = {
+//   api: {
+//     bodyParser: true,
+//   },
+// };
 app.listen(port, () => {
     return console.log(`Server is listening on ${port}`);
 });
