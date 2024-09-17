@@ -59,7 +59,7 @@ app.get("/img", async (req: any, res: Response) => {
 });
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: true,
   },
 };
 

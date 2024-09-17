@@ -57,7 +57,7 @@ app.get("/img", async (req, res) => {
 });
 exports.config = {
     api: {
-        bodyParser: false,
+        bodyParser: true,
     },
 };
 app.listen(port, () => {
