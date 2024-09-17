@@ -24,9 +24,9 @@ import dotenv from "dotenv";
 import streamifier from "streamifier";
 
 dotenv.config();
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-const uploadMiddleware = upload.single("file");
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
+// const uploadMiddleware = upload.single("file");
 cloudinary.config({
   cloud_name: "dbacwthnv",
   api_key: "511772263679235",
@@ -45,9 +45,16 @@ function runMiddleware(req: any, res: any, fn: any) {
   });
 }
 
-app.post("/img", async (req: any, res: Response) => {
-  await runMiddleware(req, res, uploadMiddleware);
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+app.post("/img", upload.single("file"), async (req: any, res: Response) => {
+  console.log("first");
+  console.log(req?.file?.buffer);
+  // const iii = await runMiddleware(req, res, uploadMiddleware);
+
   console.log(req.file.buffer);
+
   const stream = await cloudinary.uploader.upload_stream(
     {
       folder: "demo",
@@ -57,8 +64,10 @@ app.post("/img", async (req: any, res: Response) => {
       res.status(200).json(result);
     }
   );
+
   streamifier.createReadStream(req.file.buffer).pipe(stream);
 });
+
 // export const config = {
 //   api: {
 //     bodyParser: true,
